@@ -536,7 +536,13 @@ class NohmModel {
             throw new Error('Update was called without having an id set.');
         }
         const hmSetArguments = [];
-        const client = this.client.multi();
+        let client;
+        if (options.redisMulti) {
+            client = options.redisMulti;
+        }
+        else {
+            client = this.client.multi();
+        }
         const isCreate = !this.inDb;
         hmSetArguments.push(`${this.prefix('hash')}:${this.id}`);
         for (const [key, prop] of this.properties) {
@@ -549,7 +555,12 @@ class NohmModel {
             client.hmset.apply(client, hmSetArguments);
         }
         await this.setIndices(client);
-        await typed_redis_helper_1.exec(client);
+        if (options.redisMulti) {
+            return;
+        }
+        else {
+            await typed_redis_helper_1.exec(client);
+        }
         const linkResults = await this.storeLinks(options);
         this.relationChanges = [];
         const linkFailures = linkResults.filter((linkResult) => !linkResult.success);

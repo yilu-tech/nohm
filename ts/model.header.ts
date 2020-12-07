@@ -1,4 +1,5 @@
 import { NohmModel } from './model';
+import * as redis from 'redis';
 
 export type TPropertyTypeNames =
   | 'string'
@@ -118,6 +119,7 @@ export interface IModelOptions {
 export interface ISaveOptions {
   silent?: boolean;
   skip_validation_and_unique_indexes?: boolean;
+  redisMulti?: redis.Multi;
 }
 
 export interface IProperty {

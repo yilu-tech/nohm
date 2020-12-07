@@ -736,13 +736,18 @@ abstract class NohmModel<TProps extends IDictionary = IDictionary> {
 
   private async update(
     options: ISaveOptions,
-  ): Promise<Array<ILinkSaveResult> | LinkError> {
+  ): Promise<Array<ILinkSaveResult> | LinkError | void> {
     if (!this.id) {
       throw new Error('Update was called without having an id set.');
     }
 
     const hmSetArguments: Array<string> = [];
-    const client = this.client.multi();
+    let client;
+    if (options.redisMulti) {
+      client = options.redisMulti;
+    } else {
+      client = this.client.multi();
+    }
     const isCreate = !this.inDb;
 
     hmSetArguments.push(`${this.prefix('hash')}:${this.id}`);
@@ -759,8 +764,11 @@ abstract class NohmModel<TProps extends IDictionary = IDictionary> {
     }
 
     await this.setIndices(client);
-
-    await exec(client);
+    if (options.redisMulti) {
+      return;
+    } else {
+      await exec(client);
+    }
 
     const linkResults = await this.storeLinks(options);
     this.relationChanges = [];

@@ -1,4 +1,5 @@
 import { NohmModel } from './model';
+import * as redis from 'redis';
 export declare type TPropertyTypeNames = 'string' | 'bool' | 'boolean' | 'integer' | 'int' | 'float' | 'number' | 'date' | 'time' | 'timestamp' | 'json';
 export declare const stringProperty: TPropertyTypeNames;
 export declare const boolProperty: TPropertyTypeNames;
@@ -72,6 +73,7 @@ export interface IModelOptions {
 export interface ISaveOptions {
     silent?: boolean;
     skip_validation_and_unique_indexes?: boolean;
+    redisMulti?: redis.Multi;
 }
 export interface IProperty {
     value: any;
